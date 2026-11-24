@@ -2,24 +2,28 @@ import { copyFileSync, existsSync, mkdirSync, readFileSync, statSync } from 'nod
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const here = dirname(fileURLToPath(import.meta.url));
-const source = join(here, 'entry.png');
-const outputDir = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
+// Resolve directory paths
+const currentDir = dirname(fileURLToPath(import.meta.url));
+const imagePath = join(currentDir, 'entry.png');
+const destinationDir = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
 
-if (!existsSync(source)) {
-  throw new Error('entry.png is missing from the repository root');
+// Verify source image existence
+if (!existsSync(imagePath)) {
+  throw new Error('entry.png not found at root');
 }
 
-const bytes = statSync(source).size;
-if (bytes > 1024 * 1024) {
-  throw new Error('entry.png is larger than the 1 MiB gate limit');
+// Check size constraints
+const fileSize = statSync(imagePath).size;
+if (fileSize > 1024 * 1024) {
+  throw new Error('entry.png exceeds 1 MiB limit');
 }
 
-const header = readFileSync(source).subarray(0, 8);
-if (header[0] !== 0x89 || header.toString('ascii', 1, 4) !== 'PNG') {
-  throw new Error('entry.png is not a valid PNG file');
+// Validate PNG signature bytes
+const magic = readFileSync(imagePath).subarray(0, 8);
+if (magic[0] !== 0x89 || magic.toString('ascii', 1, 4) !== 'PNG') {
+  throw new Error('entry.png is not a valid PNG image format');
 }
 
-mkdirSync(outputDir, { recursive: true });
-copyFileSync(source, join(outputDir, 'entry.png'));
-console.log(`Wrote entry.png (${bytes} bytes) to ${outputDir}`);
+mkdirSync(destinationDir, { recursive: true });
+copyFileSync(imagePath, join(destinationDir, 'entry.png'));
+console.log(`Successfully exported entry.png (${fileSize} bytes) to ${destinationDir}`);
