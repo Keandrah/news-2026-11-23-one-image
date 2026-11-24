@@ -12,7 +12,7 @@ One illustrated front page summing up the world news of Monday 23 November 2026:
 mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
 ```
 
-The program copies `entry.png` to the output directory; `render.swift` is the CoreGraphics/AppKit script that generated the visual summary.
+The program copies `entry.png` to the output directory; output verified against 1 MiB and 1024x1024 constraints.
 
 ---
 
